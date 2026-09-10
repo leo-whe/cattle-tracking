@@ -1,0 +1,12 @@
+# Detector weights: fetched from the official ultralytics assets on first run
+*.pt
+
+# Pipeline outputs
+runs/
+*.mp4
+*.csv
+*.npz
+*.png
+
+__pycache__/
+*.py[cod]

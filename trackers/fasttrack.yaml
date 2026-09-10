@@ -1,0 +1,16 @@
+# FastTracker: occlusion-aware ByteTrack variant. Selected default for this pipeline.
+tracker_type: fasttrack
+track_high_thresh: 0.25
+track_low_thresh: 0.10
+new_track_thresh: 0.25
+track_buffer: 30
+match_thresh: 0.80
+fuse_score: true
+reset_velocity_offset_occ: 5
+reset_pos_offset_occ: 3
+enlarge_bbox_occ: 1.1
+dampen_motion_occ: 0.5
+active_occ_to_lost_thresh: 10
+occ_cover_thresh: 0.7
+occ_reappear_window: 40
+init_iou_suppress: 0.7

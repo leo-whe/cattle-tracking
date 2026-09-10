@@ -1,0 +1,9 @@
+# FastTracker is only available from ultralytics 8.4.x
+ultralytics>=8.4.113
+torch>=2.6.0
+torchvision>=0.21.0
+opencv-python>=4.9.0
+numpy>=1.26.0
+matplotlib>=3.8.0
+# Stage 3 additionally fetches CoTracker3 through torch.hub on first run,
+# which needs network access once and then caches under ~/.cache/torch/hub.
