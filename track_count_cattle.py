@@ -1,8 +1,11 @@
 """Detect, track and count cattle in a drone video.
 
-Runs a COCO-pretrained YOLO detector restricted to the ``cow`` class and
-associates detections across frames with FastTracker. Writes an annotated MP4,
-one CSV row per tracked detection, a per-frame count CSV and a JSON summary.
+Runs a YOLO26 detector and associates detections across frames with FastTracker.
+The default detector is the bundled ``weights/cattle_nadir_m.pt``, a YOLO26m
+finetuned on teacher pseudo-labels so that it also fires on low-altitude
+straight-down footage, where the COCO ``cow`` class finds almost nothing. Writes
+an annotated MP4, one CSV row per tracked detection, a per-frame count CSV and a
+JSON summary.
 
 The burnt-in readout is the number of animals in view, smoothed over a short
 window. The cumulative unique-track-ID total is kept in the CSV and JSON as a
@@ -27,24 +30,26 @@ from ultralytics import YOLO
 
 
 ROOT = Path(__file__).resolve().parent
-DEFAULT_MODEL = ROOT / "yolo26m.pt"
+DEFAULT_MODEL = ROOT / "weights" / "cattle_nadir_m.pt"
 DEFAULT_TRACKER = ROOT / "trackers" / "fasttrack.yaml"
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", type=Path, required=True, help="Input video")
-    parser.add_argument("--model", type=Path, default=DEFAULT_MODEL)
+    parser.add_argument("--model", type=Path, default=DEFAULT_MODEL,
+                        help="Local checkpoint, or a bare ultralytics asset name such as yolo26m.pt")
     parser.add_argument("--output-dir", type=Path, default=ROOT / "runs" / "tracking")
     parser.add_argument("--start-sec", type=float, default=0.0)
     parser.add_argument("--duration-sec", type=float, default=None)
     parser.add_argument("--max-frames", type=int, default=None, help="Debug limit after start time")
-    parser.add_argument("--imgsz", type=int, default=3200,
+    parser.add_argument("--imgsz", type=int, default=1920,
                         help="Detector input size; must match the animals' apparent size, not the file resolution")
     parser.add_argument("--conf", type=float, default=0.25)
     parser.add_argument("--iou", type=float, default=0.7)
     parser.add_argument("--tracker", default=str(DEFAULT_TRACKER))
-    parser.add_argument("--class-names", default="cow", help="Comma-separated classes; use 'all' to disable filtering")
+    parser.add_argument("--class-names", default="cattle",
+                        help="Comma-separated classes ('cow' for COCO weights); 'all' disables filtering")
     parser.add_argument("--device", default=None, help="For example 0, cpu; auto-selected by default")
     parser.add_argument("--output-width", type=int, default=1920, help="Annotated video width; 0 keeps source size")
     parser.add_argument("--no-video", action="store_true", help="Only write CSV and JSON")
@@ -95,9 +100,14 @@ def main() -> None:
             raise RuntimeError(f"Could not create output video: {video_path}")
 
     device = choose_device(args.device)
-    # Use a local checkpoint when one is present, otherwise pass the bare name so
-    # ultralytics resolves and downloads it on first use.
-    model_ref = str(args.model) if args.model.is_file() else args.model.name
+    # Use a local checkpoint when one is present. A bare name such as yolo26m.pt is
+    # passed through so ultralytics resolves and downloads it on first use.
+    if args.model.is_file():
+        model_ref = str(args.model)
+    elif args.model.parent == Path("."):
+        model_ref = args.model.name
+    else:
+        raise FileNotFoundError(f"Model not found: {args.model}")
     model = YOLO(model_ref)
     selected_names = (
         None

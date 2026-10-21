@@ -44,13 +44,13 @@ def main() -> None:
 
     fig, ax = plt.subplots(figsize=(11, 5.5))
     ax.plot(t, base["unique_track_ids"], color="#c0392b", lw=2,
-            label=f"cumulative unique track IDs (what the old overlay showed) -> {int(base['unique_track_ids'][-1])}")
+            label=f"cumulative raw tracker IDs (diagnostic, not a count) -> {int(base['unique_track_ids'][-1])}")
     ax.plot(t, base["active_tracks"], color="#7f8c8d", lw=0.8, alpha=0.7,
             label="cattle in view per frame")
 
     for path, colour, name in ((args.stitched_counts, "#e67e22", "motion-compensated stitching"),
                                (args.point_counts, "#27ae60", "point-correspondence voting (CoTracker)"),
-                               (args.world_counts, "#2980b9", "+ ground-position merge")):
+                               (args.world_counts, "#2980b9", "final (ground-position + duplicate-box merge)")):
         if path is None or not path.is_file():
             continue
         d = read(path, ("frame", "active_identities", "cumulative_identities"))

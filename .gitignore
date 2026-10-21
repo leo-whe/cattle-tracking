@@ -1,9 +1,12 @@
-# Detector weights: fetched from the official ultralytics assets on first run
+# Detector weights: only the bundled checkpoints under weights/ are tracked.
+# COCO yolo26m.pt (preset coco-highalt) is fetched by ultralytics on first run.
 *.pt
+!weights/*.pt
 
 # Pipeline outputs
 runs/
 *.mp4
+*.MP4
 *.csv
 *.npz
 *.png

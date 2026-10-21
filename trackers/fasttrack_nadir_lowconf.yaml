@@ -1,0 +1,26 @@
+# FastTracker for low-altitude nadir flights at ~30 fps, run with the nadir detector
+# at imgsz 3840 and conf 0.10 (preset `nadir-lowconf`).
+#
+# Thresholds are lowered to match that detector feed. On these flights the model was
+# measured recall-limited and not precision-limited: every extra box gained between
+# conf 0.25 and 0.08 landed on a real animal, and verified-empty pasture frames stay
+# at 0-1 detections even at 3840/0.08. Leaving new_track_thresh at 0.25 would
+# therefore discard real scattered animals that only ever score 0.10-0.25.
+#
+# track_buffer is 2 s because the drone pans fast enough to carry an animal out of
+# view and back.
+tracker_type: fasttrack
+track_high_thresh: 0.15
+track_low_thresh: 0.05
+new_track_thresh: 0.15
+track_buffer: 60
+match_thresh: 0.80
+fuse_score: true
+reset_velocity_offset_occ: 5
+reset_pos_offset_occ: 3
+enlarge_bbox_occ: 1.1
+dampen_motion_occ: 0.5
+active_occ_to_lost_thresh: 10
+occ_cover_thresh: 0.7
+occ_reappear_window: 60
+init_iou_suppress: 0.7

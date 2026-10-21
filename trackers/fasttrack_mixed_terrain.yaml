@@ -1,0 +1,26 @@
+# FastTracker for mixed-terrain flights at ~30 fps (preset `mixed-terrain`): oblique
+# distant herds, bare gravel riverbed, then pasture with single animals.
+#
+# The gravel is the constraint. The nadir detector was trained on grass pasture, and
+# on river stones it hallucinates: at imgsz 3840 it puts up to 284 boxes on a frame
+# with zero cattle. Measured false positives over five verified-empty gravel frames:
+#   imgsz 3840 -> 366   2560 -> 135   1920 -> 21   1280 -> 2      (all at conf 0.25)
+# so this preset runs at imgsz 1920.
+#
+# The detector is fed at conf 0.45 and new_track_thresh is set above it, so the
+# marginal band 0.45-0.60 can only continue an existing track, never start one.
+tracker_type: fasttrack
+track_high_thresh: 0.55
+track_low_thresh: 0.45
+new_track_thresh: 0.60
+track_buffer: 60
+match_thresh: 0.80
+fuse_score: true
+reset_velocity_offset_occ: 5
+reset_pos_offset_occ: 3
+enlarge_bbox_occ: 1.1
+dampen_motion_occ: 0.5
+active_occ_to_lost_thresh: 10
+occ_cover_thresh: 0.7
+occ_reappear_window: 60
+init_iou_suppress: 0.7

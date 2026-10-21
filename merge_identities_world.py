@@ -1,8 +1,9 @@
 """Final deduplication stage: merge identities that occupy the same ground position.
 
-Point voting can only bridge a gap while its seeded points are still being
-tracked, so an animal the detector drops for several hundred frames still comes
-back as a fresh identity. This stage catches those.
+Stitching and point voting can only bridge short gaps, so an animal the detector
+drops for several hundred frames still comes back as a fresh identity. This stage
+catches those. It starts from the union of any number of links files (the output
+of ``stitch_links.py`` and, optionally, ``point_identity_count.py``).
 
 Every detection is mapped out of image coordinates into the coordinate frame of
 the first video frame, by chaining the cached per-frame camera motion. A grazing
@@ -33,8 +34,9 @@ import numpy as np
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--tracks", type=Path, required=True)
-    parser.add_argument("--links", type=Path, required=True,
-                        help="*_point_summary.json produced by point_identity_count.py")
+    parser.add_argument("--links", type=Path, nargs="+", required=True,
+                        help="One or more links JSON files ({'links': [{'pred', 'succ'}]}), "
+                             "e.g. stitch_links.json and *_point_summary.json")
     parser.add_argument("--motion-cache", type=Path, required=True)
     parser.add_argument("--out-dir", type=Path, required=True)
     parser.add_argument("--min-track-len", type=int, default=3)
@@ -78,7 +80,7 @@ def main() -> None:
             x = table[x]
         return x
 
-    links = json.loads(args.links.read_text())["links"]
+    links = [link for path in args.links for link in json.loads(path.read_text())["links"]]
     for link in links:
         a, b = link["pred"], link["succ"]
         if a in parent and b in parent and find(a, parent) != find(b, parent):
@@ -165,7 +167,7 @@ def main() -> None:
 
     summary = {
         "input_tracks": len(tracks),
-        "identities_after_point_voting": before,
+        "identities_after_links": before,
         "identities_after_world_merge": len(final_groups),
         "world_merges": merges,
         "total_reduction_vs_raw_tracks": round(len(tracks) / max(1, len(final_groups)), 2),

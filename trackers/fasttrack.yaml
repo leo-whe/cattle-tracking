@@ -1,4 +1,6 @@
-# FastTracker: occlusion-aware ByteTrack variant. Selected default for this pipeline.
+# FastTracker, occlusion-aware ByteTrack variant, for ~30 fps footage.
+# Default association for this pipeline: it fragments least (1.64 tracks per animal
+# against ByteTrack's 2.57 on identical cached detections).
 tracker_type: fasttrack
 track_high_thresh: 0.25
 track_low_thresh: 0.10
