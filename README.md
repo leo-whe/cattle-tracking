@@ -5,8 +5,6 @@ tracker's fragmented IDs into one stable identity per animal.
 
 **Author:** Leo ([@leo-whe](https://github.com/leo-whe)), who designed and built the
 pipeline.
-**Access:** private repository. Code, model weights and results are not licensed for
-redistribution without the author's permission.
 
 This is version 2 of the pipeline. Version 1 used the COCO-pretrained `yolo26m` `cow`
 class. On low-altitude, straight-down (nadir) footage that detector finds almost
